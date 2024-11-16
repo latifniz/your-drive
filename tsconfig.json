@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                              // Output ECMAScript 6
+    "module": "commonjs",                         // Use CommonJS modules (Node.js)
+    "strict": true,                               // Enable all strict type-checking options
+    "noImplicitAny": true,                        // Disallow `any` type
+    "noImplicitThis": true,                       // Ensure `this` is typed
+    "strictNullChecks": true,                     // Enforce null checks
+    "strictFunctionTypes": true,                  // Enforce strict function types
+    "strictBindCallApply": true,                  // Check that `.bind`, `.call`, and `.apply` methods are correct
+    "noImplicitReturns": true,                    // Disallow functions from implicitly returning `undefined`
+    "noFallthroughCasesInSwitch": true,           // Prevent fallthrough in switch statements
+    "noUnusedLocals": true,                       // Report errors on unused local variables
+    "noUnusedParameters": true,                   // Report errors on unused function parameters
+    "noImplicitOverride": true,                   // Ensure `override` keyword is used when overriding methods
+    "noPropertyAccessFromIndexSignature": true,   // Prevent property access from index signatures
+    "forceConsistentCasingInFileNames": true,     // Ensure file names follow the same casing
+    "esModuleInterop": true,                      // Enable esModuleInterop to allow default imports
+    "skipLibCheck": true,                         // Skip checking the declaration files of libraries
+    "allowUnreachableCode": false,                // Prevent unreachable code
+    "allowUnusedLabels": false,                   // Disallow unused labels
+    "outDir": "./dist",                           // Output directory for compiled files
+    "rootDir": "./src"                          // Root directory for TypeScript source files
+    
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

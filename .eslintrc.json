@@ -1,0 +1,23 @@
+{
+    "env": {
+      "node": true,        // Enable Node.js global variables
+      "es6": true          // Enable ES6 features
+    },
+    "parser": "@typescript-eslint/parser", // Use the TypeScript parser for ESLint
+    "parserOptions": {
+      "ecmaVersion": 2016,  // Use ECMAScript 2020 syntax
+      "sourceType": "module" // Allow imports/exports
+    },
+    "plugins": ["@typescript-eslint"],     // Add TypeScript plugin
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended", // Recommended TypeScript linting rules
+      "plugin:prettier/recommended"             // Use Prettier rules
+    ],
+    "rules": {
+      "prettier/prettier": "error",  // Ensure Prettier formatting is enforced
+      "@typescript-eslint/no-explicit-any": "error",  // Disallow `any` type
+      "@typescript-eslint/no-unused-vars": "error"    // Report unused variables
+    }
+  }
+  
