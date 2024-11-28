@@ -11,12 +11,12 @@ class FileStreamUploader extends EventEmitter {
   private fileStream: fs.ReadStream;
   private currentChunkPath: string | null;
 
-  constructor(fileStream: fs.ReadStream, chunkSize: number, destinationDirPath: string) {
+  constructor(fileStream: fs.ReadStream, chunkSize: number, destinationDirPath: string,chunkIndex?:number) {
     super();
     this.fileStream = fileStream;
     this.destinationDirPath = destinationDirPath;
     this.chunkSize = chunkSize;
-    this.currentChunkIndex = 0;
+    this.currentChunkIndex = chunkIndex || 0;
     this.currentChunkPath = null;
     this.bytesWritten = 0;
     this.chunkStream = null;

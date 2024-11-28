@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 1", 
     "start": "node dist/app.js",
     "dev": "nodemon"
   },
@@ -12,11 +12,14 @@
   "description": "",
   "dependencies": {
     "@types/cors": "^2.8.17",
+    "@types/express-validator": "^2.20.33",
     "bcrypt": "^5.1.1",
     "connect-timeout": "^1.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.13.0",
@@ -34,9 +37,11 @@
     "@types/connect-timeout": "^0.0.39",
     "@types/express": "^5.0.0",
     "@types/faker": "^6.6.8",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^22.7.1",
+    "@types/pg": "^8.11.10",
     "@types/sequelize": "^4.28.20",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
@@ -49,6 +54,6 @@
     "nodemon": "^3.1.7",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.6.3"
   }
 }

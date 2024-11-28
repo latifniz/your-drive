@@ -9,4 +9,7 @@ export type UploadRequest = {
     user: UserModel,
     folderId: bigint,
     chunkSize: number,
+    fileId?: bigint, // if we are resuming file then request contains fileId
+    chunkIndex?: number // if we are resuming 
+    fileSize: bigint
 }

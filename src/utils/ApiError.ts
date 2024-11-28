@@ -8,26 +8,26 @@ class ApiError extends Error {
   public statusCode: number;
   public data: any | null;
   public success: boolean;
-  public errors: any[];
+  public error: any;
   
   /**
    * 
    * @param {number} statusCode
    * @param {string} message
-   * @param {any[]} errors
+   * @param {any} error
    * @param {string} stack
    */
   constructor(
     statusCode: number,
     message: string = "Something went wrong",
-    errors: any[] = [],
+    error: any = '',
     stack: string = ""
   ) {
     super(message);
     this.statusCode = statusCode;
     this.data = null;
     this.success = false;
-    this.errors = errors;
+    this.error = error;
 
     if (stack) {
       this.stack = stack;

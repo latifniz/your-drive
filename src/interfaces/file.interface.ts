@@ -2,8 +2,7 @@ import { FileUploadStatus } from "../enums/uploadStatus.enum";
 
 export interface File {
     fileId?: bigint;
-    userId: bigint; // Reference to the Users table
-    folderId?: bigint | null; // Reference to the Folders table
+    folderId: bigint | null; // Reference to the Folders table
     originalFilename: string;
     uniqueFilename: string;
     totalSize: bigint; // will be known after processing the file , maybe before

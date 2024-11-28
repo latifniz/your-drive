@@ -6,7 +6,7 @@ type GitHubAccountCreationAttributes = Optional<GitHubAccountInterface, 'githubA
 
 export class GitHubAccount extends Model<GitHubAccountInterface, GitHubAccountCreationAttributes> implements GitHubAccountInterface {
     public githubAccountId!: bigint;
-    public isAssigned?: boolean;
+    public isAssigned!: boolean;
     public githubUsername!: string;
     public githubUserEmail!: string;
     public githubUserPassword!: string;
@@ -26,7 +26,7 @@ export class GitHubAccount extends Model<GitHubAccountInterface, GitHubAccountCr
             isAssigned: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
-                allowNull: false,  // empty github account can also exist
+                allowNull: false,
             },
             githubUsername: {
                 type: DataTypes.STRING,
@@ -62,6 +62,3 @@ export class GitHubAccount extends Model<GitHubAccountInterface, GitHubAccountCr
         });
     }
 }
-
-// // Initialize the model after the class definition
-// GitHubAccount.initialize();

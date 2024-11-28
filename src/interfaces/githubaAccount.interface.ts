@@ -1,6 +1,6 @@
 export interface GitHubAccount {
     githubAccountId?: bigint;
-    isAssigned?: boolean,
+    isAssigned: boolean,
     githubUsername: string;
     githubUserEmail: string;
     githubUserPassword: string

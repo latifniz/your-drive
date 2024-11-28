@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",                              // Output ECMAScript 6
-    "module": "commonjs",                         // Use CommonJS modules (Node.js)
+    "module": "CommonJS",                         // Use CommonJS modules (Node.js)
     "strict": true,                               // Enable all strict type-checking options
     "noImplicitAny": true,                        // Disallow `any` type
     "noImplicitThis": true,                       // Ensure `this` is typed
@@ -20,8 +20,9 @@
     "allowUnreachableCode": false,                // Prevent unreachable code
     "allowUnusedLabels": false,                   // Disallow unused labels
     "outDir": "./dist",                           // Output directory for compiled files
-    "rootDir": "./src"                          // Root directory for TypeScript source files
-    
+    "rootDir": "./src" ,                         // Root directory for TypeScript source files
+     "allowSyntheticDefaultImports": true,
+  
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

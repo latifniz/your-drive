@@ -1,8 +1,6 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import { sequelize } from '../config/database.config';
 import { User as UserInterface } from '../interfaces/user.interface';
-// import bcrypt from 'bcrypt'
-
 
 type UserCreationAttributes = Optional<UserInterface, 'userId' | 'createdAt' | 'updatedAt'>;
 
@@ -10,9 +8,9 @@ export class User extends Model<UserInterface, UserCreationAttributes> implement
     public userId!: bigint;
     public username!: string;
     public email!: string;
-    public passwordHash?: string;
+    public passwordHash!: string;
     public oauth_authenticated?: boolean;
-    public githubAccountId?: bigint; // Reference to the GitHubAccount table, if the user is authenticated via GitHub
+    public githubAccountId!: bigint; // Reference to the GitHubAccount table
     public createdAt!: Date;
     public updatedAt!: Date;
 
@@ -35,7 +33,7 @@ export class User extends Model<UserInterface, UserCreationAttributes> implement
             },
             passwordHash: {
                 type: DataTypes.STRING,
-                allowNull:true
+                allowNull:false
             },
             oauth_authenticated: {
                 type: DataTypes.BOOLEAN,
@@ -44,7 +42,11 @@ export class User extends Model<UserInterface, UserCreationAttributes> implement
             },
             githubAccountId: {
                 type: DataTypes.BIGINT,
-                allowNull: false, // Users without GitHub authentication don't have a reference to a GitHubAccount
+                allowNull: false, // User requires a GitHubAccount
+                references: {
+                    model: 'github_accounts', // Name of the GitHubAccount model
+                    key: 'githubAccountId'
+                },
             },
             createdAt: {
                 type: DataTypes.DATE,
@@ -64,40 +66,3 @@ export class User extends Model<UserInterface, UserCreationAttributes> implement
         });
     }
 }
-
-
-// // Instance method for password comparison
-// export const comparePassword = async (user: User, password: string): Promise<boolean> => {
-//     if (!user.passwordHash) {
-//         return false; // No password to compare against (OAuth user)
-//     }
-    
-//     return await bcrypt.compare(password, user.passwordHash);
-// };
-
-// // Hooks for password hashing
-// const hashPassword = async (user: User) => {
-//     if (user.passwordHash) {
-//         user.passwordHash = await bcrypt.hash(user.passwordHash, 10);
-//     }
-// };
-
-// const onBeforeCreate = async (user: User) => {
-//     if (user.passwordHash) {
-//         await hashPassword(user);
-//     }
-// };
-
-// const onBeforeUpdate = async (user: User) => {
-//     if (user.changed('passwordHash') && user.passwordHash) {
-//         return await hashPassword(user);
-//     }
-//     return Promise.resolve(); // Ensure a promise is returned
-// };
-
-// // Add hooks to the User model
-// User.addHook('beforeCreate', onBeforeCreate);
-// User.addHook('beforeUpdate', onBeforeUpdate);
-
-// // Initialize the model after the class definition
-// User.initialize();

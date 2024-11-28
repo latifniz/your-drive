@@ -8,6 +8,8 @@ import { Folder as FolderModel } from './associations';
 import { Plan as PlanModel } from './associations';
 import { Subscription as SubscriptionModel } from './associations';
 import { OAuthAccount as OAuthAccountModel } from './associations';
+import { Download as DownloadModel } from './associations';
+import { UserStorage as UserStorageModel} from './associations';
 
 // UserModel.initialize();
 // FileModel.initialize();
@@ -18,6 +20,7 @@ import { OAuthAccount as OAuthAccountModel } from './associations';
 // GitHubAccountModel.initialize();
 // PlanModel.initialize();
 // SubscriptionModel.initialize();
+// DownloadModel.initialize();
 
 // Exporting the models
 export {
@@ -29,6 +32,8 @@ export {
     FolderModel,
     PlanModel,
     SubscriptionModel,
-    OAuthAccountModel
+    OAuthAccountModel,
+    DownloadModel,
+    UserStorageModel
 };
 

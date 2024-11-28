@@ -1,6 +1,7 @@
 import { ChunkUploadStatus } from '../enums/uploadStatus.enum';
 import { Chunk } from '../interfaces/chunk.interface';
 import { ChunkModel } from '../models/index';
+import { Op } from 'sequelize';
 
 export class ChunkService {
   // Create a new chunk
@@ -39,20 +40,20 @@ export class ChunkService {
   }
  
   // Get all chunksIds with FileId
-  static async getAllChunkIdsByFileId(fileId: bigint) { 
-      try {
-          const chunks = await ChunkModel.findAll({
-              where: { fileId },
-              attributes: ['chunkId']
-          });
- 
-          return chunks.sort((a,b) => a.dataValues.chunkNumber - b.dataValues.chunkNumber)
-          .map((chunk) => chunk.dataValues.chunkId)
-          
-      } catch (err) {
-          throw new Error(`Error finding chunks by file ID: ${err}`);
-      }
-  }
+  static async getChunksFromIndexByFileId(fileId: bigint, index: number) {
+    try {
+        // Get all chunks where chunkNumber is >= index
+        const chunks = await ChunkModel.findAll({
+            where: { fileId, chunkNumber: { [Op.gte]: index } }, // Filter by chunkNumber >= index
+            order: [['chunkNumber', 'ASC']], // Ensure the chunks are sorted by chunkNumber
+        });
+
+        return chunks;
+    } catch (err) {
+        throw new Error(`Error finding chunks by file ID from index ${index}: ${err}`);
+    }
+}
+
 
   // Get RepoId from ChunkId 
   static async getRepoIdByChunkId(chunkId: bigint) { 

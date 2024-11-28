@@ -1,6 +1,6 @@
 
 import { FileUploadStatus } from '../enums/uploadStatus.enum';
-import { FileModel, UserModel } from '../models';
+import { FileModel} from '../models';
 import path from 'path';
 import { FileType } from '../types/fileType';
 
@@ -8,25 +8,31 @@ import { FileType } from '../types/fileType';
 
 export class FileService {
 
-   private user: UserModel; 
    private file: FileType;
    private fileInstance: FileModel | null;
    private folderId: bigint | null; // if root folder
 
    constructor(
-     user:UserModel,file:FileType, folderId:bigint
+     file:FileType, folderId:bigint,
     ) {
      // Initialize any necessary variables or services here
-     this.user = user;
      this.file = file;
      this.fileInstance = null;
      this.folderId = folderId;
    }
 
-public async createFile() {
+public async createFileIfNotExists(fileId?:bigint) {
        try {
+        
+         if (fileId) {
+          const existingFile = await FileModel.findOne({ where: { fileId } });
+           if(existingFile) {
+             this.fileInstance = existingFile;
+             console.log("File already exists");
+             return;
+           }
+         }
           const file = await FileModel.create({
-              userId: this.user.userId!,
               folderId: this.folderId, 
               originalFilename: this.file.originalName,
               uniqueFilename: this.generateUniqueFileName(this.file.originalName),
@@ -93,16 +99,45 @@ public getFileInstanceId() {
    return this.fileInstance?.fileId;
 }
 
-public static async getFileModel(fileId:bigint,userId:bigint) {
+public static async getFileModel(fileId:bigint,folderId:bigint) {
      try {
          // Get the file if exits
          const file = await FileModel.findOne({
-           where: { fileId, userId },
+           where: { fileId, folderId },
          });
          return file?.dataValues;
      } catch (err) {
        console.error(err);
        throw new Error('Failed to retrieve file model');
      }
+}
+
+public static async getFileBytesIfExists(fileId:bigint, fileOriginalName:string) {
+      try {
+          // Check if file exists
+          const file = await FileModel.findOne({
+            where: { fileId, originalFilename:fileOriginalName }
+          });
+          if(file) {
+            return file.dataValues.totalSize;
+          }
+          return;
+      } catch(err) {
+        console.error(err);
+        throw new Error('Failed to retrieve file bytes');
+      }
+}
+
+public static async getTotalUploadedChunks(fileId:bigint) {
+   try {
+       // Get the total chunks of the file
+       const file = await FileModel.findOne({
+         where: { fileId },
+       });
+       return file?.dataValues.totalChunks;
+   } catch (err) {
+     console.error(err);
+     throw new Error('Failed to retrieve total file chunks');
+   }
 }
 }

@@ -9,3 +9,8 @@ export default async function directoryExists(dirPath:string): Promise<boolean> 
     }
 }
 
+export function bytesToGB(bytes: bigint) {
+  const gb = Number(bytes) / (1024 * 1024 * 1024); // Convert bytes to GB
+  return Math.floor(gb * 100)/100;
+}
+

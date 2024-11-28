@@ -7,7 +7,6 @@ type FileCreationAttributes = Optional<FileInterface, 'fileId' | 'createdAt' | '
 
 export class File extends Model<FileInterface, FileCreationAttributes> implements FileInterface {
     public fileId!: bigint;
-    public userId!: bigint;
     public folderId!: bigint;
     public originalFilename!: string;
     public uniqueFilename!: string;
@@ -29,10 +28,6 @@ export class File extends Model<FileInterface, FileCreationAttributes> implement
                 type: DataTypes.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
-            },
-            userId: {
-                type: DataTypes.BIGINT,
-                allowNull: false,
             },
             folderId: {
                 type: DataTypes.BIGINT,

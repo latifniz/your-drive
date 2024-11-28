@@ -1,4 +1,4 @@
-import { RepositoryModel } from '../models/index';
+import { ChunkModel, RepositoryModel } from '../models/index';
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -241,5 +241,79 @@ public static async findRepoUrl(repoId:bigint) {
   }
 }
 
+
+static async getRepositoriesByFileIds(fileIds: bigint[]) {
+  // Step 1: Find all chunks related to the given file IDs
+  const chunks = await ChunkModel.findAll({
+      where: {
+          fileId: fileIds // Filters chunks that belong to these files
+      },
+      attributes: ['repoId'], // Only get the repoId from chunks
+      include: [
+          {
+              model: RepositoryModel, // Include the Repository model
+              attributes: ['repoId', 'githubAccountId'], // Select repository fields
+          }
+      ]
+  });
+
+  // Step 2: Extract the unique repository IDs from the chunks
+  const repoIds = Array.from(new Set(chunks.map(chunk => chunk.repoId)));
+
+  // Step 3: Fetch repositories associated with the extracted repoIds
+  const repositories = await RepositoryModel.findAll({
+      where: {
+          repoId: repoIds // Filter repositories by the extracted repoIds
+      }
+  });
+
+  return repositories;
+}
+
+
+
+  // Function to delete all specified repositories
+  static async deleteAllRepos(repoNamesToDelete: string[],githubUsername:string,accessToken:string): Promise<void> {
+    if (repoNamesToDelete.length === 0) {
+      console.log('No repositories to delete.');
+      return;
+    }
+
+    // Use Promise.all to delete repositories concurrently
+    const deletePromises = repoNamesToDelete.map((repoName) => RepositoryService.deleteRepository(repoName,githubUsername,accessToken));
+    await Promise.all(deletePromises);
+    // also delete all repositories from db
+    await RepositoryModel.destroy({
+      where: {
+        repositoryName: repoNamesToDelete,
+      },
+    });
+
+    console.log(`Successfully deleted repositories: ${repoNamesToDelete.join(', ')}`);
+
+    console.log(`Successfully deleted all specified repositories.`);
+  }
+
+  // Helper function to delete a single repository
+  private static async deleteRepository(repositoryName:string,githubUsername:string,accessToken:string): Promise<void> {
+    const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}`;
+
+    try {
+      const response = await axios.delete(url, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+
+      if (response.status === 204) {
+        console.log(`Successfully deleted repository: ${repositoryName}`);
+      } else {
+        console.log(`Failed to delete repository: ${repositoryName}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting repository ${repositoryName}: ${error}`);
+      throw new Error(`Failed to delete repository ${repositoryName}`);
+    }
+  }
 
 }

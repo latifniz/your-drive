@@ -33,7 +33,7 @@ const sequelizeConfig: any = {
         ca: fs.readFileSync(caPath).toString(),  // Path to the CA certificate file
       },
     };
-  }
+  } 
 
   const sequelize = new Sequelize(sequelizeConfig);
 // Create a new Sequelize instance
@@ -65,6 +65,7 @@ const testConnection = async () => {
         console.log('Connection to PostgreSQL has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
+        throw new Error();
     }
 };
 

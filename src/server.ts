@@ -1,24 +1,25 @@
 import app from './app';
-import { testConnection } from './config/database.config';
+import { testConnection,sequelize } from './config/database.config';
 import { config } from './config/config';
 // import seedDatabase from './scripts/sequelize/seed';
 // import { deleteGitFolders } from './scripts/cleanUp';
-const port = config.port;
+const port = config.port || 3000;
 const host = config.app_host;
 // const uploadDir = process.env['DESTINATION_DIR'];
 
 const startServer = async () => {
   try {
   await testConnection();
-  //  await sequelize.sync({alter:true});
+  await sequelize.sync({alter:true});
  
   // await seedDatabase();
   
   const server = app.listen(port, () => {
     console.log(`Server running on http://${host}:${port}`);
   });
-  server.requestTimeout = 1000*60*60; // 1 hour 
-  server.keepAliveTimeout = 1000*60*10 // 10 minutes
+  server.requestTimeout = 1000*60*60*24; // 1 hour 
+  server.keepAliveTimeout = 1000*60*60*24 // 60 minutes
+  server.setTimeout(1000*60*60*24);
 
   // server.setTimeout(1000*60*60,() => {   // 1hour 
   //   console.log('Server timed out');

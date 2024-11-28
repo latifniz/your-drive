@@ -6,7 +6,8 @@ import { ChunkService } from "./chunk.service";
 import path from 'path';
 import fs from "fs";
 import { ChunkUploadStatus, FileUploadStatus } from "../enums/uploadStatus.enum";
-
+import { Request } from "express";
+import { UserStorageModel } from "../models";
 export class UploadService {
     private repositoryService: RepositoryService;
     private fileService: FileService;
@@ -15,10 +16,14 @@ export class UploadService {
     private maxChunkQueueSize: number;
     private isChunkUploading: boolean;
 
+    private fileId?: bigint; // if resuming file.
+    private userId: bigint;
+    private fileSize: bigint;
+
     constructor(uploadRequest: UploadRequest) {
+        this.fileId = uploadRequest.fileId;
         this.repositoryService = new RepositoryService(uploadRequest.githubAccount, uploadRequest.folderPath);
         this.fileService = new FileService(
-            uploadRequest.user,
             {
                 originalName: uploadRequest.fileName,
                 mimetype: uploadRequest.mimeType,
@@ -30,10 +35,13 @@ export class UploadService {
             uploadRequest.fileStream,
             uploadRequest.chunkSize,
             uploadRequest.folderPath,
+            uploadRequest.chunkIndex
         );
         this.chunkQueue = [];
         this.maxChunkQueueSize = 5;
         this.isChunkUploading = false;
+        this.userId = uploadRequest.user.userId;
+        this.fileSize = uploadRequest.fileSize;
     }
 
     private async processUploads(chunkPath: string) {
@@ -117,10 +125,11 @@ export class UploadService {
         }
     }
 
-    public async uploadFile() {
+    public async uploadFile(req: Request) {
         try {
-            await this.fileService.createFile();
-            
+            await this.fileService.createFileIfNotExists(this.fileId);
+            // attach the created file to request so could be sent to user
+            req.body.fileId = this.fileService.getFileInstanceId()
             // Track errors within the event listeners
             const uploadPromise = new Promise<void>((resolve, reject) => {
                 this.fileStreamUploader.on('chunkReceived', async (chunk: Buffer) => {
@@ -160,8 +169,12 @@ export class UploadService {
             // Start the stream handler
             await this.fileStreamUploader.handleStream();
             await uploadPromise; // Await the combined promise
-    
+            
             console.log("File uploaded successfully");
+            // when file upload is done update the user storage
+            const storage = await UserStorageModel.findOne({where:{userId:this.userId}});
+            storage!.usedStorage = storage?.usedStorage! + this.fileSize;
+            await storage!.save();
     
         } catch (err) {
             await this.fileService.updateFileUploadStatus(FileUploadStatus.FAILED);
@@ -183,3 +196,4 @@ private async completePendingUploads() {
 }
     
 }
+ 

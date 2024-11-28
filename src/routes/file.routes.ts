@@ -1,13 +1,13 @@
 import express, { Request, Response } from 'express';
-// import { FileController } from '../controllers/file.controller';
-// import { FolderController } from '../controllers/folder.controller';
+import { upload } from '../middlewares/multer.middleware';
 import { DownloadService } from '../services/download.service';
 import { DownloadRequest } from '../types/downloadRequest';
 import auth from '../middlewares/auth.middleware';
+import { FileService } from '../services/file.service';
+import { downloadFileValidator, resumeFileValidator, uploadFileValidator, validateRequest } from '../validators/file.validator';
+import { canUploadThisFile } from '../middlewares/file.middleware';
+import { ApiResponse } from '../utils/ApiResponse';
 
-// async function getFile(downloadRequest: DownloadRequest) {
-//     return new DownloadService(downloadRequest)
-// }
 const router = express.Router();
 
 // ==================================
@@ -43,18 +43,58 @@ const router = express.Router();
  */ 
 
 
-router.get("/file",auth, async (req: Request, res: Response) => {
-    const { userId, fileId } = req.body;
+/**
+ * @swagger
+ * /file/download/{fileId}:
+ *   get:
+ *     summary: Download a file
+ *     description: Download a file from the server based on the file ID.
+ *     tags:
+ *       - Files
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         description: Unique ID of the file to download
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: header
+ *         name: Authorization
+ *         description: Bearer token for authentication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "Bearer your-access-token"
+ *     responses:
+ *       '200':
+ *         description: File downloaded successfully
+ *         content:
+ *           application/octet-stream:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       '400':
+ *         description: Bad request, fileId is missing or invalid
+ *       '401':
+ *         description: Unauthorized access, invalid or missing access token
+ *       '500':
+ *         description: Internal server error
+ */
+
+router.get("/file/download/:folderId/:fileId",auth, downloadFileValidator,validateRequest, async (req: Request, res: Response) => {
+   
+    const { fileId, folderId } = req.params;
   
     try {
-      if(!userId || !fileId) {
+      if(!fileId || !folderId ) {
         res.status(400).json({ message: "Missing userId or fileId" });
         return;
       }
       // Create a download request object
       const downloadRequest: DownloadRequest = {
-        userId: BigInt(userId),
+        userId: BigInt(req.body.user.userId),
         fileId: BigInt(fileId),
+        folderId: BigInt(folderId),
         githubAccount: req.body.githubAccount,
       };
   
@@ -63,14 +103,14 @@ router.get("/file",auth, async (req: Request, res: Response) => {
   
   
       // Get the file stream from the service and pipe it to the response
-       await downloadService.downloadFile(res);
+       await downloadService.downloadFile(res,req);
      
     } catch (error) {
       console.error("Error in file download route:", error);
     //   res.status(500).json({ message: "Failed to download file", error });
       res.end(JSON.stringify({ success: false, message: 'File transfer failed', error }));
     }
-  });
+});
 /**
  * @swagger
  * /files:
@@ -96,8 +136,14 @@ router.get("/file",auth, async (req: Request, res: Response) => {
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/File'
+ *       '206':
+ *        description: Sending partial file content (stream) 
  *       '401':
  *         description: Unauthorized access
+ *       '406':
+ *          'description': Requested Range Not Satisfiable 
+ *       '404':
+ *         description: Account not found
  *       '500':
  *         description: Internal server error
  */
@@ -107,12 +153,40 @@ router.get("/file",auth, async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /files:
+ * /file/upload/{fileId}:
  *   post:
- *     summary: Upload a single or multiple files
- *     description: Upload one or more files for the authenticated user.
+ *     summary: Upload a single file
+ *     description: Upload a file for the authenticated user.
  *     tags:
  *       - Files
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         description: Unique ID of the file to download (for resuming uploads)
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: folderId
+ *         description: ID of the folder where the file should be uploaded
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           format: int64
+ *       - in: header
+ *         name: Authorization
+ *         description: Bearer token for authentication
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "Bearer your-access-token"
+ *       - in: header
+ *         name: X-File-Size
+ *         description: Size of the file being uploaded (in bytes)
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           format: int64
  *     requestBody:
  *       required: true
  *       content:
@@ -120,39 +194,38 @@ router.get("/file",auth, async (req: Request, res: Response) => {
  *           schema:
  *             type: object
  *             properties:
- *               files:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *               folderId:
- *                 type: integer
- *                 format: int64
- *                 required: true
- *               size:
- *                 type: integer
- *                 format: int64
- *                 required: true
+ *               file:
+ *                 type: string
+ *                 format: binary
  *     responses:
  *       '201':
- *         description: Files uploaded successfully
+ *         description: File uploaded successfully
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 uploadedFiles:
- *                   type: array
+ *                 uploadedFile:
+ *                   type: object
  *                   items:
  *                     $ref: '#/components/schemas/File'
  *       '400':
- *         description: Invalid file type or size
+ *         description: Invalid request, such as missing folderId or X-File-Size
  *       '401':
  *         description: Unauthorized access
  *       '500':
  *         description: Internal server error
  */
-// router.post('/files', FileController.uploadFiles);
+
+
+router.post('/file/upload/:fileId?',auth, uploadFileValidator,validateRequest,canUploadThisFile,upload, (req: Request, res: Response) => {
+  res.status(200).json(new ApiResponse(200, {
+     message: 'File uploaded successfully!',
+     fileId: req.body.fileId
+  }))
+});
+
+
 
 /**
  * @swagger
@@ -231,5 +304,22 @@ router.get("/file",auth, async (req: Request, res: Response) => {
  */
 // router.put('/files/:fileId', FileController.updateFile);
 
+
+router.get("/file/resume/:fileId",auth, resumeFileValidator,validateRequest, async(req: Request, res: Response) => {
+      try {
+         const fileId = req.params['fileId'] as unknown as bigint;
+        
+         const fileName = req.headers['x-file-name'] as string;
+         const bytes =  await FileService.getFileBytesIfExists(fileId,fileName);
+         if(bytes) {
+            res.status(200).json({bytesUploaded : bytes});
+            return;
+         }
+          res.status(404).json({bytesUploaded : 0});
+      } catch(err) {
+        console.error('Error in file resume route:', err);
+        res.status(500).json({ message: 'Failed to retrieve file resume', });
+      }
+})
 
 export default router;
