@@ -20,8 +20,8 @@ YourDrive is a Node.js application built with Express.js, Sequelize, and Postgre
 1. Clone the repository: `git clone https://github.com/anoniz/your-drive.git`
 2. Install dependencies: `npm install`
 3. Create a `.env` file with the sample.env or just rename it to .env:
-
-Replace the placeholders with your actual database credentials.
+4. Replace the placeholders with your actual database credentials.
+5. You have to manually insert github account credentials in db before running.
 
 ### Running the Application
 
