@@ -36,25 +36,6 @@ const sequelizeConfig: any = {
   } 
 
   const sequelize = new Sequelize(sequelizeConfig);
-// Create a new Sequelize instance
-// const sequelize =  new Sequelize(
-//     config.sequelize.database,
-//     config.sequelize.username,
-//     config.sequelize.password,
-//     {
-//         host: config.sequelize.host,
-//         dialect: 'postgres',
-//         port: config.sequelize.port as unknown as number,
-//         logging: false, // set to true for verbose logging
-//         define: {
-//             timestamps: true, // automatically adds createdAt and updatedAt fields
-//             schema: "upload",
-//             freezeTableName: true
-//         },
-      
-//     }
-// )
-
 
 
 // Test the database connection
