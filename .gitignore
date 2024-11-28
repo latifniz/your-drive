@@ -1,3 +1,3 @@
 node_modules/
+certs/
 .env
-certs/ca.pem
