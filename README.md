@@ -62,6 +62,11 @@ This project is licensed under the ISC License.
 * swagger-jsdoc and swagger-ui-express for API documentation
 * winston for logging
 
+**Discord**
+* Join the Discord server 
+* https://discord.gg/JGYk8r8F
+
+
 **Contact**
 * If you need any help or have any questions. feel free to contact
 * abdullatifnizamani517@gmail.com
