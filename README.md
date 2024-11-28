@@ -61,3 +61,7 @@ This project is licensed under the ISC License.
 * sequelize for ORM
 * swagger-jsdoc and swagger-ui-express for API documentation
 * winston for logging
+
+**Contact**
+* If you need any help or have any questions. feel free to contact
+* abdullatifnizamani517@gmail.com

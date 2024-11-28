@@ -1,0 +1,40 @@
+how the flow should look like (its not complete)
+
+1. user uploads a file
+2. chunks get stored and pushed into queue for upload
+3. if queue size >= maxAllowedSize then puase the file stream
+4. resume the file stream when queue size reduces.
+
+
+Handle failure
+1. retry 5 times with 1500 mil sec each. check if the failure is local git repo then fix it
+2. if failure is from github push then try creating new github repo and then push.
+3. if failure is due to account problem then not fixable
+
+Resume upload.
+1. when something wrong happen during file uploads there are two cases.
+   a. problem from client. client closes the request somehow not sending more data.
+   b. problem from server. any error occured during uploads on server..
+2. whatever the case is client side will have retry button when clicked.  (server will check first if this file then call the retry route).
+   a. it will get the starting bytes from server to send data from then on.
+   b. server will get chunks from those bytes ahead and continue upload.   
+
+
+How the download file flow should look like
+1. server gets a request with userId and fileId.
+2. it verify userId and get userModel and fileModel and find githubAccount
+3. from the file it will know how many chunks are there in total.
+4. it gets array of chunksIds with this file id. (sorted 1 to n)
+5. then it finds the repoId with chunkId and chunkFIle name 
+6. it then finds the repoUrl with that repoId and finds that chunkFile in that repo
+7. and download that chunkFile from that repo.
+
+
+// Steps of account creation
+1. check if it exits already
+2. create user account
+3. assign a github account and root folder entry
+4. create a subscripton and plan (payment thing later);
+5. create the user storage entry
+6. generate jwt token
+
