@@ -47,11 +47,6 @@ export const getFoldersRules = [
       .withMessage('ParentId is required.')
 ];
 
-export const getFolderRules = [
-    param('folderId')
-      .isInt({ min: 1 })
-      .withMessage('Folder ID must be a valid positive integer.')
-];
 
 export const validateRequest = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);

@@ -11,6 +11,7 @@ import { Readable } from "stream";
 // import { FileModel } from "../models";
 import { File } from "../interfaces/file.interface";
 import axios from "axios";
+import { ApiResponse } from "../utils/ApiResponse";
 
 // import { Readable } from "stream";
 
@@ -48,7 +49,7 @@ export class DownloadService {
           const startByte = parseInt(ranges[0], 10);
 
           if (startByte >= file.totalSize) { // can't satisfy this request
-              res.status(416).send("Requested Range Not Satisfiable");
+              res.status(416).json(new ApiResponse(416,{},"Requested Range Not Satisfiable"))
               return;
           }
           

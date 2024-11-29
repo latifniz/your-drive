@@ -6,9 +6,9 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'StoreIt API',
+      title: 'Your Drive API',
       version: '1.0.0',
-      description: 'API documentation for StoreIt REST API',
+      description: 'API documentation for Your Drive REST API',
     },
     servers: [
       {

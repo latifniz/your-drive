@@ -1,8 +1,15 @@
-import express from 'express';
-import { FolderController } from '../controllers/folder.controller';
-import auth from '../middlewares/auth.middleware';
-import { CreateFolderRules, DeleteFolderRules, getFolderRules, getFoldersRules, RenameFolderRules, validateRequest } from '../validators/folder.validator';
-import { asyncHandler } from '../utils/asyncHandler';
+import express from "express";
+import { FolderController } from "../controllers/folder.controller";
+import auth from "../middlewares/auth.middleware";
+import {
+  CreateFolderRules,
+  DeleteFolderRules,
+  getFoldersRules,
+  RenameFolderRules,
+  validateRequest,
+} from "../validators/folder.validator";
+import { asyncHandler } from "../utils/asyncHandler";
+import { authorizeFolderAccess } from "../middlewares/folder.middleware";
 // import { FolderController } from '../controllers/folder.controller';
 
 const router = express.Router();
@@ -20,16 +27,8 @@ const router = express.Router();
  *       properties:
  *         folderId:
  *           type: integer
- *           format: int64
- *         userId:
- *           type: integer
- *           format: int64
  *         folderName:
  *           type: string
- *         parentId:
- *           type: integer
- *           format: int64
- *           nullable: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -40,51 +39,73 @@ const router = express.Router();
  *           type: string
  *           format: date-time
  *           nullable: true
- *         deletedAt:
+ *     File:
+ *       type: object
+ *       properties:
+ *         fileId:
+ *           type: integer
+ *         folderId:
+ *           type: integer
+ *         originalFilename:
+ *           type: string
+ *         totalSize:
+ *           type: integer
+ *           format: int64
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         trashedAt:
  *           type: string
  *           format: date-time
  *           nullable: true
  */
 
-
 /**
  * @swagger
  * /folders/{parentId}:
  *   get:
- *     summary: Retrieve multiple folders
- *     description: Get a list of all folders for the authenticated user.
+ *     summary: Retrieve folders and files
+ *     description: Get folders and files for the given parent folder.
  *     tags:
- *        - Folders
+ *       - Folders
  *     parameters:
  *       - in: path
  *         name: parentId
- *         description: Unique ID of the parent folder to find folders.
  *         required: true
  *         schema:
  *           type: integer
  *           format: int64
  *     responses:
  *       '200':
- *         description: A list of folders
+ *         description: A list of folders and files
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Folder'
+ *               type: object
+ *               properties:
+ *                 folders:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Folder'
+ *                 files:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/File'
  *       '401':
- *         description: Unauthorized access
+ *         description: Unauthorized
  *       '404':
- *         description: Folder not found
+ *         description: Not Found
  *       '500':
- *         description: Internal server error
+ *         description: Internal Server Error
  */
- router.get('/folders/:parentId',
-           auth,
-           getFoldersRules, 
-           validateRequest,
-           FolderController.doParentFolderExitst,
-           asyncHandler(FolderController.getAllFoldersByParentId)
+
+router.get(
+  "/folders/:parentId",
+  auth,
+  getFoldersRules,
+  validateRequest,
+  authorizeFolderAccess,
+  asyncHandler(FolderController.getAllFoldersByParentId)
 );
 
 /**
@@ -103,7 +124,7 @@ const router = express.Router();
  *             type: object
  *             properties:
  *               name:
- *                 type: string 
+ *                 type: string
  *                 required: true
  *               parentId:
  *                 type: integer
@@ -126,50 +147,13 @@ const router = express.Router();
  *         description: Internal server error
  */
 // needs parent id in req.body
-router.post('/folder/create',
-            auth,
-            CreateFolderRules, 
-            validateRequest,
-            FolderController.doParentFolderExitst,
-            asyncHandler(FolderController.createFolder)
-);
-
-/**
- * @swagger
- * /folder/{folderId}:
- *   get:
- *     summary: Retrieve a single folder
- *     description: Get a single folder by ID.
- *     tags:
- *       - Folders
- *     parameters:
- *       - in: path
- *         name: folderId
- *         description: Unique folder ID.
- *         required: true
- *         schema:
- *           type: integer
- *           format: int64
- *     responses:
- *       '200':
- *         description: A single folder
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Folder'
- *       '401':
- *         description: Unauthorized access
- *       '404':
- *         description: Folder not found
- *       '500':
- *         description: Internal server error
- */
-router.get('/folder/:folderId',
-            auth,
-            getFolderRules, 
-            validateRequest,
-            FolderController.doParentFolderExitst,
-            asyncHandler(FolderController.getFolderById)
+router.post(
+  "/folder/create",
+  auth,
+  CreateFolderRules,
+  validateRequest,
+  authorizeFolderAccess,
+  asyncHandler(FolderController.createFolder)
 );
 
 /**
@@ -210,12 +194,13 @@ router.get('/folder/:folderId',
  *       '500':
  *         description: Internal server error
  */
-router.put('/folder/rename',
-           auth,
-           RenameFolderRules, 
-           validateRequest,
-           FolderController.doParentFolderExitst,
-           asyncHandler(FolderController.renameFolder)
+router.put(
+  "/folder/rename",
+  auth,
+  RenameFolderRules,
+  validateRequest,
+  authorizeFolderAccess,
+  asyncHandler(FolderController.renameFolder)
 );
 
 /**
@@ -244,11 +229,13 @@ router.put('/folder/rename',
  *       '500':
  *         description: Internal server error
  */
-router.delete('/folder/delete/:folderId',
-            auth,
-            DeleteFolderRules, 
-            validateRequest,
-            FolderController.doParentFolderExitst,
-            asyncHandler(FolderController.deleteFolderById)
+router.delete(
+  "/folder/delete/:folderId",
+  auth,
+  DeleteFolderRules,
+  validateRequest,
+  authorizeFolderAccess,
+  asyncHandler(FolderController.deleteFolderById)
 );
-export default router
+
+export default router;

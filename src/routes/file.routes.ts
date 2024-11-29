@@ -1,13 +1,20 @@
-import express, { Request, Response } from 'express';
-import { upload } from '../middlewares/multer.middleware';
-import { DownloadService } from '../services/download.service';
-import { DownloadRequest } from '../types/downloadRequest';
-import auth from '../middlewares/auth.middleware';
-import { FileService } from '../services/file.service';
-import { downloadFileValidator, resumeFileValidator, uploadFileValidator, validateRequest } from '../validators/file.validator';
-import { canUploadThisFile } from '../middlewares/file.middleware';
-import { ApiResponse } from '../utils/ApiResponse';
-
+import express from "express";
+import { upload as uploadMiddleware } from "../middlewares/multer.middleware";
+import auth from "../middlewares/auth.middleware";
+import {
+  deleteFileValidator,
+  downloadFileValidator,
+  resumeFileValidator,
+  uploadFileValidator,
+  validateRequest,
+} from "../validators/file.validator";
+import {
+  authorizeFileAccess,
+  canUploadThisFile,
+} from "../middlewares/file.middleware";
+import { FileController } from "../controllers/file.controller";
+import { asyncHandler } from "../utils/asyncHandler";
+import { authorizeFolderAccess } from "../middlewares/folder.middleware";
 const router = express.Router();
 
 // ==================================
@@ -20,7 +27,6 @@ const router = express.Router();
  *   - name: Files
  *     description: File management endpoints
  */
-
 
 /**
  * @swagger
@@ -40,12 +46,11 @@ const router = express.Router();
  *         size:
  *            type: integer
  *            format: int64
- */ 
-
+ */
 
 /**
  * @swagger
- * /file/download/{fileId}:
+ * /file/download/{folderId}/{fileId}:
  *   get:
  *     summary: Download a file
  *     description: Download a file from the server based on the file ID.
@@ -81,75 +86,15 @@ const router = express.Router();
  *         description: Internal server error
  */
 
-router.get("/file/download/:folderId/:fileId",auth, downloadFileValidator,validateRequest, async (req: Request, res: Response) => {
-   
-    const { fileId, folderId } = req.params;
-  
-    try {
-      if(!fileId || !folderId ) {
-        res.status(400).json({ message: "Missing userId or fileId" });
-        return;
-      }
-      // Create a download request object
-      const downloadRequest: DownloadRequest = {
-        userId: BigInt(req.body.user.userId),
-        fileId: BigInt(fileId),
-        folderId: BigInt(folderId),
-        githubAccount: req.body.githubAccount,
-      };
-  
-      // Initialize the DownloadService
-      const downloadService = new DownloadService(downloadRequest);
-  
-  
-      // Get the file stream from the service and pipe it to the response
-       await downloadService.downloadFile(res,req);
-     
-    } catch (error) {
-      console.error("Error in file download route:", error);
-    //   res.status(500).json({ message: "Failed to download file", error });
-      res.end(JSON.stringify({ success: false, message: 'File transfer failed', error }));
-    }
-});
-/**
- * @swagger
- * /files:
- *   get:
- *     summary: Retrieve multiple files in a folder
- *     description: Get a list of all files in folder for the authenticated user.
- *     tags:
- *       - Files
- *     parameters:
- *       - in: query
- *         name: folderId
- *         description: Unique ID of the folder to find files.
- *         required: true
- *         schema:
- *           type: integer
- *           format: int64
- *     responses:
- *       '200':
- *         description: A list of files
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/File'
- *       '206':
- *        description: Sending partial file content (stream) 
- *       '401':
- *         description: Unauthorized access
- *       '406':
- *          'description': Requested Range Not Satisfiable 
- *       '404':
- *         description: Account not found
- *       '500':
- *         description: Internal server error
- */
-//  router.get('/files', FileController.getFiles);
-
-
+router.get(
+  "/file/download/:folderId/:fileId",
+  auth,
+  downloadFileValidator,
+  validateRequest,
+  authorizeFolderAccess,
+  authorizeFileAccess,
+  asyncHandler(FileController.download)
+);
 
 /**
  * @swagger
@@ -217,15 +162,16 @@ router.get("/file/download/:folderId/:fileId",auth, downloadFileValidator,valida
  *         description: Internal server error
  */
 
-
-router.post('/file/upload/:fileId?',auth, uploadFileValidator,validateRequest,canUploadThisFile,upload, (req: Request, res: Response) => {
-  res.status(200).json(new ApiResponse(200, {
-     message: 'File uploaded successfully!',
-     fileId: req.body.fileId
-  }))
-});
-
-
+router.post(
+  "/file/upload/:fileId?",
+  auth,
+  uploadFileValidator,
+  validateRequest,
+  authorizeFolderAccess,
+  canUploadThisFile,
+  uploadMiddleware,
+  asyncHandler(FileController.upload)
+);
 
 /**
  * @swagger
@@ -247,79 +193,94 @@ router.post('/file/upload/:fileId?',auth, uploadFileValidator,validateRequest,ca
  *                 items:
  *                   type: integer
  *                   format: int64
+ *               folderId:
+ *                 type: integer
+ *                 format: int64
  *     responses:
  *       204:
  *         description: Files deleted successfully
  *       400:
  *         description: Bad request, invalid input
- *         
+ *
  *       404:
  *         description: No files found to delete
  *       500:
  *         description: Internal server error
  */
-// router.delete('/files', FileController.deleteFiles);
+
+router.delete(
+  "/files",
+  auth,
+  deleteFileValidator,
+  validateRequest,
+  authorizeFolderAccess,
+  authorizeFileAccess,
+  asyncHandler(FileController.delete)
+);
 
 /**
  * @swagger
- * /files/{fileId}:
- *   put:
- *     summary: Update a file
- *     description: Update the content of a file (resume) for the authenticated user.
+ * /files/{fileId}/resume:
+ *   get:
+ *     summary: Resume file upload
+ *     description: This route allows the client to resume the upload of a file by checking how many bytes have been uploaded so far.
  *     tags:
  *       - Files
  *     parameters:
  *       - in: path
  *         name: fileId
- *         description: Unique ID of the file to update.
+ *         description: Unique identifier of the file to resume upload for.
  *         required: true
  *         schema:
  *           type: integer
  *           format: int64
- *     requestBody:
- *       required: true
- *       content:
- *         binary:
- *           schema:
- *             type: string
- *             format: binary
+ *       - in: header
+ *         name: x-file-name
+ *         description: The file name as part of the request headers. It is used to fetch the specific file's progress.
+ *         required: true
+ *         schema:
+ *           type: string
  *     responses:
  *       '200':
- *         description: File updated successfully
+ *         description: File resume details including the bytes uploaded.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 updatedFile:
- *                   $ref: '#/components/schemas/File'
- *       '400':
- *         description: Invalid file content
- *       '401':
- *         description: Unauthorized access
+ *                 bytesUploaded:
+ *                   type: integer
+ *                   description: Number of bytes uploaded for the file.
  *       '404':
- *         description: File not found
+ *         description: File not found or file progress could not be determined.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 bytesUploaded:
+ *                   type: integer
+ *                   description: Number of bytes uploaded (0 if no progress found).
  *       '500':
- *         description: Internal server error
+ *         description: Internal server error, possibly due to a failure in retrieving the file resume.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Error message.
  */
-// router.put('/files/:fileId', FileController.updateFile);
 
-
-router.get("/file/resume/:fileId",auth, resumeFileValidator,validateRequest, async(req: Request, res: Response) => {
-      try {
-         const fileId = req.params['fileId'] as unknown as bigint;
-        
-         const fileName = req.headers['x-file-name'] as string;
-         const bytes =  await FileService.getFileBytesIfExists(fileId,fileName);
-         if(bytes) {
-            res.status(200).json({bytesUploaded : bytes});
-            return;
-         }
-          res.status(404).json({bytesUploaded : 0});
-      } catch(err) {
-        console.error('Error in file resume route:', err);
-        res.status(500).json({ message: 'Failed to retrieve file resume', });
-      }
-})
+router.get(
+  "/file/resume/:fileId",
+  auth,
+  resumeFileValidator,
+  validateRequest,
+  authorizeFolderAccess,
+  authorizeFileAccess,
+  asyncHandler(FileController.resume)
+);
 
 export default router;
