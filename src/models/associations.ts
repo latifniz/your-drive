@@ -48,15 +48,16 @@ Download.belongsTo(File, { foreignKey: 'fileId' });
 User.hasMany(Download, { foreignKey: 'userId', onDelete: 'CASCADE' });
 Download.belongsTo(User, { foreignKey: 'userId' });
 
-// User-to-GitHubAccount: A user can have one GitHub account.
-User.belongsTo(GitHubAccount, { foreignKey: 'githubAccountId' });
+// User-to-GitHubAccount: A user can have one GitHub account but One Github can be used for multiple users.
+User.belongsTo(GitHubAccount, { foreignKey: 'githubAccountId', onDelete: 'CASCADE' });
+GitHubAccount.hasMany(User, { foreignKey: 'githubAccountId' });
 
 // OAuthAccount-to-User: A user can have one OAuth account (e.g., Google login).
-User.hasOne(OAuthAccount, { foreignKey: 'userId', onDelete: 'SET NULL' });
+User.hasOne(OAuthAccount, { foreignKey: 'userId', onDelete: 'CASCADE' });
 OAuthAccount.belongsTo(User, { foreignKey: 'userId' });
 
 // User-to-Subscription: A user can have one subscription plan.
-User.hasOne(Subscription, { foreignKey: 'userId', onDelete: 'CASCADE' });
+User.hasOne(Subscription, { foreignKey: 'userId', onDelete: 'SET NULL' });
 Subscription.belongsTo(User, { foreignKey: 'userId' });
 
 // Plan-to-Subscription: A subscription references a specific plan.
@@ -67,8 +68,12 @@ Subscription.belongsTo(Plan, { foreignKey: 'planId' });
 GitHubAccount.hasMany(Repository, { foreignKey: 'githubAccountId', onDelete: 'CASCADE' });
 Repository.belongsTo(GitHubAccount, { foreignKey: 'githubAccountId' });
 
+// Chunks-to-Repositories: A Repositories will have a lot of chunks.
+Repository.hasMany(Chunk, {foreignKey:'repoId', onDelete:'CASCADE'});
+Chunk.belongsTo(Repository, { foreignKey: 'repoId' });
+
 // User-to-UserStorage: A user has a single storage allocation.
-User.hasOne(UserStorage, { foreignKey: 'userId', onDelete: 'CASCADE' });
+User.hasOne(UserStorage, { foreignKey: 'userId', onDelete: 'SET NULL' });
 UserStorage.belongsTo(User, { foreignKey: 'userId' });
 
 

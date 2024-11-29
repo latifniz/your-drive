@@ -84,8 +84,7 @@ export class FolderController {
              res.status(404).json(new ApiResponse(404, { message: 'Folder not found.' }));
              return;
          }
-         folder.folderName = newName;
-         await folder.save();
+         await folder.update({ folderName: newName });
          res.json(new ApiResponse(200, folder));
      } catch (err) {
          console.error(err);
@@ -94,7 +93,8 @@ export class FolderController {
   }
   
   static async deleteFolderById(req: Request, res: Response) {
-    // delete all children folders and files
+    try {
+        // delete all children folders and files
     // get all folders inside this
     const folderId = req.params["folderId"] as unknown as bigint;
     const userId = req.body.user.userId as unknown as bigint;
@@ -121,7 +121,6 @@ export class FolderController {
     
     // here delete everything from the server 
     const allRepos = await RepositoryService.getRepositoriesByFileIds(fileIds.map(file => file.fileId))
-
     // most expensive task make it to background
      RepositoryService.deleteAllRepos(
         allRepos.map(repo => repo.repositoryName),
@@ -130,9 +129,14 @@ export class FolderController {
     )
    
     // delete the folder itself (it will cascade and delete all the files and chunks and repos)
-
+    
     FolderModel.destroy({ where: { folderId, userId } });
-    res.status(204).json(new ApiResponse(204, null));
+    res.status(200).json(new ApiResponse(200, {},"Folder deleted successfully"));
+    } catch(err) {
+        console.error(err);
+        res.status(500).json(new ApiResponse(500, { message: 'Failed to delete folder.' }));
+    }
+    
   }
 
    static async doParentFolderExitst(req: Request, res: Response, next: NextFunction) {
@@ -159,8 +163,9 @@ export class FolderController {
 
   private static async isRootFolder(folderId:bigint) {
      try {
-         const rootFolder = await FolderModel.findOne({ where: { folderId, parentId:undefined } });
-         return rootFolder ? true : false;
+         const rootFolder = await FolderModel.findOne({ where: { folderId} });
+         
+         return rootFolder?.parentId ? false : true;
      } catch(err) {
          console.error(err);
          throw new Error('Failed to retrieve root folder.');

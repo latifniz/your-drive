@@ -45,8 +45,9 @@ export class User extends Model<UserInterface, UserCreationAttributes> implement
                 allowNull: false, // User requires a GitHubAccount
                 references: {
                     model: 'github_accounts', // Name of the GitHubAccount model
-                    key: 'githubAccountId'
+                    key: 'githubAccountId',
                 },
+                onDelete: 'CASCADE', // If the GitHub account is deleted, the user will also be deleted
             },
             createdAt: {
                 type: DataTypes.DATE,

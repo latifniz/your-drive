@@ -6,7 +6,6 @@ type GitHubAccountCreationAttributes = Optional<GitHubAccountInterface, 'githubA
 
 export class GitHubAccount extends Model<GitHubAccountInterface, GitHubAccountCreationAttributes> implements GitHubAccountInterface {
     public githubAccountId!: bigint;
-    public isAssigned!: boolean;
     public githubUsername!: string;
     public githubUserEmail!: string;
     public githubUserPassword!: string;
@@ -22,11 +21,6 @@ export class GitHubAccount extends Model<GitHubAccountInterface, GitHubAccountCr
                 type: DataTypes.BIGINT,
                 autoIncrement: true,
                 primaryKey: true,
-            },
-            isAssigned: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false,
-                allowNull: false,
             },
             githubUsername: {
                 type: DataTypes.STRING,

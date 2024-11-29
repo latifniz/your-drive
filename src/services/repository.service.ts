@@ -290,8 +290,6 @@ static async getRepositoriesByFileIds(fileIds: bigint[]) {
     });
 
     console.log(`Successfully deleted repositories: ${repoNamesToDelete.join(', ')}`);
-
-    console.log(`Successfully deleted all specified repositories.`);
   }
 
   // Helper function to delete a single repository

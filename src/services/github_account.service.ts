@@ -1,5 +1,5 @@
-import { GitHubAccountModel } from "../models";
-
+import { GitHubAccountModel, UserModel } from "../models";
+import sequelize from "sequelize";
 
 export class GitHubAccountService  {
     
@@ -16,34 +16,31 @@ export class GitHubAccountService  {
     }
 
     static async assignGithubAccount() {
-         try {
-             const account = await GitHubAccountModel.findOne({
-                where: {isAssigned:false},
+        try {
+            // Find the GitHub account with the least number of associated users
+            const account = await GitHubAccountModel.findOne({
                 attributes: {
-                    exclude:['userId']
-                }
+                    include: [
+                        [
+                            sequelize.fn('COUNT', sequelize.col('Users.userId')), // Dynamically count users
+                            'userCount', // Alias for the count
+                        ],
+                    ],
+                },
+                include: [
+                    {
+                        model: UserModel,
+                        attributes: [], // Exclude user details
+                    },
+                ],
+                group: ['GitHubAccount.githubAccountId'], // Group by account ID
+                order: [[sequelize.literal('userCount'), 'ASC']], // Order by count
             });
-             if(account) {
-             account.isAssigned = true;
-             await account.save();
-             return account;
-             }
-             return null;
-         } catch (err) {
-             throw new Error(`Error assigning GitHub account to user: ${err}`);
-         }
-    }
-    static async unassignAccount(accountId:bigint) {
-         try {
-             const account = await GitHubAccountModel.findByPk(accountId);
-             if(account) {
-             account.isAssigned = false;
-             await account.save();
-             }
-         } catch (err) {
-             throw new Error(`Error unassigning GitHub account from user: ${err}`);
-         }
-    }
     
-   
+            return account || null;
+        } catch (err) {
+            throw new Error(`Error assigning GitHub account to user: ${err}`);
+        }
+    }
+       
 }
