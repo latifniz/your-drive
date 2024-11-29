@@ -148,4 +148,17 @@ export class FileService {
       throw new Error("Failed to delete multiple files");
     }
   }
+
+  static async getFileByName(folderId: bigint, name: string) {
+    try {
+      // Get the file if exists
+      const file = await FileModel.findOne({
+        where: { folderId, originalFilename: name },
+      });
+      return file?.dataValues;
+    } catch (err) {
+      console.error(err);
+      throw new Error("Failed to retrieve file by name");
+    }
+  }
 }

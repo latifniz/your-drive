@@ -126,7 +126,10 @@ export async function authorizeFileAccess(
       req.body.folderId ||
       req.body.parentId ||
       (req.query["folderId"] as unknown as bigint);
-    const fileIds = (req.body.fileIds || req.params["fileId"]) as bigint[]; // Array of file IDs from the request body
+
+    const fileIds = req.body.fileIds
+      ? req.body.fileIds
+      : [BigInt(req.params["fileId"])]; // Wrap single `fileId` in an array
 
     // Fetch files within the folder that belong to the user
     const files = await FileModel.findAll({

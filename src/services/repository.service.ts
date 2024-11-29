@@ -286,31 +286,35 @@ export class RepositoryService {
   }
 
   static async getRepositoriesByFileIds(fileIds: bigint[]) {
-    // Step 1: Find all chunks related to the given file IDs
-    const chunks = await ChunkModel.findAll({
-      where: {
-        fileId: fileIds, // Filters chunks that belong to these files
-      },
-      attributes: ["repoId"], // Only get the repoId from chunks
-      include: [
-        {
-          model: RepositoryModel, // Include the Repository model
-          attributes: ["repoId", "githubAccountId"], // Select repository fields
+    try {
+      // Step 1: Find all chunks related to the given file IDs
+      const chunks = await ChunkModel.findAll({
+        where: {
+          fileId: fileIds, // Filters chunks that belong to these files
         },
-      ],
-    });
+        attributes: ["repoId"], // Only get the repoId from chunks
+        include: [
+          {
+            model: RepositoryModel, // Include the Repository model
+            attributes: ["repoId", "githubAccountId"], // Select repository fields
+          },
+        ],
+      });
 
-    // Step 2: Extract the unique repository IDs from the chunks
-    const repoIds = Array.from(new Set(chunks.map((chunk) => chunk.repoId)));
+      // Step 2: Extract the unique repository IDs from the chunks
+      const repoIds = Array.from(new Set(chunks.map((chunk) => chunk.repoId)));
 
-    // Step 3: Fetch repositories associated with the extracted repoIds
-    const repositories = await RepositoryModel.findAll({
-      where: {
-        repoId: repoIds, // Filter repositories by the extracted repoIds
-      },
-    });
+      // Step 3: Fetch repositories associated with the extracted repoIds
+      const repositories = await RepositoryModel.findAll({
+        where: {
+          repoId: repoIds, // Filter repositories by the extracted repoIds
+        },
+      });
 
-    return repositories;
+      return repositories;
+    } catch (err) {
+      throw new Error(`Failed to get repositories by file IDs: ${err}`);
+    }
   }
 
   // Function to delete all specified repositories
@@ -357,7 +361,6 @@ export class RepositoryService {
     accessToken: string
   ): Promise<void> {
     const url = `https://api.github.com/repos/${githubUsername}/${repositoryName}`;
-    console.log("token ", accessToken);
     try {
       const response = await axios.delete(url, {
         headers: {

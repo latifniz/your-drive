@@ -72,7 +72,7 @@ export class FileController {
 
   static async delete(req: Request, res: Response) {
     const fileIds = req.body.fileIds as bigint[];
-    const userId = req.body.userId;
+    const userId = req.body.user.userId;
     try {
       // fetch the github account of user we need to delete repos
       const githubAccount = await GitHubAccountService.findAccountById(
@@ -85,13 +85,13 @@ export class FileController {
         fileIds
       );
       // most expensive task make it to background
-      RepositoryService.deleteAllRepos(
+      await RepositoryService.deleteAllRepos(
         allRepos.map((repo) => repo.repositoryName),
         githubAccount?.dataValues.githubUsername!,
         githubAccount?.dataValues.accessToken!
       );
       // now delete all the files from db
-      FileService.deleteMultipleFiles(fileIds);
+      await FileService.deleteMultipleFiles(fileIds);
       res
         .status(200)
         .json(new ApiResponse(200, {}, "Files deleted successfully"));

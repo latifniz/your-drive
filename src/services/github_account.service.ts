@@ -3,10 +3,8 @@ import { GitHubAccountModel, UserModel } from "../models";
 export class GitHubAccountService {
   static async findAccountById(id: bigint) {
     try {
-      return await GitHubAccountModel.findByPk(id, {
-        attributes: {
-          exclude: ["userId"],
-        },
+      return await GitHubAccountModel.findOne({
+        where: { githubAccountId: id },
       });
     } catch (err) {
       throw new Error(`Error finding GitHub account by ID: ${err}`);

@@ -133,15 +133,26 @@ export class FolderController {
         where: { parentId: folderId, userId },
         attributes: ["folderId"],
       });
+
       // get all files inside all these folders;
-      const fileIds = await FileModel.findAll({
+      const childFolderFileIds = await FileModel.findAll({
         where: { folderId: childFolderIds.map((folder) => folder.folderId) },
         attributes: ["fileId"],
       });
 
+      const currentFolderFileIds = await FileModel.findAll({
+        where: { folderId },
+        attributes: ["fileId"],
+      });
+
+      // Merge results and extract fileIds
+      const fileIds = [
+        ...childFolderFileIds.map((file) => file.fileId),
+        ...currentFolderFileIds.map((file) => file.fileId),
+      ];
       // here delete everything from the server
       const allRepos = await RepositoryService.getRepositoriesByFileIds(
-        fileIds.map((file) => file.fileId)
+        fileIds
       );
       console.log("total repos ", allRepos.length);
       // most expensive task make it to background
