@@ -1,6 +1,10 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { UserController } from '../controllers/user.controller';
-import { loginUserValidator, createUserValidator, validateRequest } from '../validators/user.validator';
+import express, { NextFunction, Request, Response } from "express";
+import { UserController } from "../controllers/user.controller";
+import {
+  loginUserValidator,
+  createUserValidator,
+  validateRequest,
+} from "../validators/user.validator";
 const router = express.Router();
 
 /**
@@ -36,7 +40,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /users/signup:
+ * /signup:
  *   post:
  *     summary: User signup
  *     description: Create a new user and return an access token.
@@ -115,21 +119,21 @@ const router = express.Router();
  *                   example: "Internal Server Error"
  */
 router.post(
-    '/signup', 
-    createUserValidator,  // Custom middleware for validation
-    validateRequest,      // Custom middleware to handle request validation errors
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        // Call the actual user creation method
-        await UserController.createUser(req, res);
-      } catch (err) {
-        next(err); // If an error occurs, pass it to the global error handler
-      }
+  "/signup",
+  createUserValidator, // Custom middleware for validation
+  validateRequest, // Custom middleware to handle request validation errors
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Call the actual user creation method
+      await UserController.createUser(req, res);
+    } catch (err) {
+      next(err); // If an error occurs, pass it to the global error handler
     }
-  );
+  }
+);
 /**
  * @swagger
- * /users/login:
+ * /login:
  *   post:
  *     summary: User login
  *     description: Authenticate a user and return an access token.
@@ -205,16 +209,16 @@ router.post(
  *                   example: "Internal Server Error"
  */
 router.post(
-    '/login', 
-    loginUserValidator,  // Custom middleware for login validation
-    validateRequest,     // Custom middleware to handle validation errors
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        // Call the actual login method
-        await UserController.login(req, res);
-      } catch (err) {
-        next(err); // If an error occurs, pass it to the global error handler
-      }
+  "/login",
+  loginUserValidator, // Custom middleware for login validation
+  validateRequest, // Custom middleware to handle validation errors
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Call the actual login method
+      await UserController.login(req, res);
+    } catch (err) {
+      next(err); // If an error occurs, pass it to the global error handler
     }
-  );
+  }
+);
 export default router;
