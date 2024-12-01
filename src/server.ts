@@ -1,18 +1,13 @@
 import app from "./app";
-import { testConnection } from "./config/database.config";
+import { testConnection, sequelize } from "./config/database.config";
 import { config } from "./config/config";
-// import seedDatabase from './scripts/sequelize/seed';
-// import { deleteGitFolders } from './scripts/cleanUp';
 const port = config.port || 3000;
 const host = config.app_host;
-// const uploadDir = process.env['DESTINATION_DIR'];
 
 const startServer = async () => {
   try {
     await testConnection();
-    //await sequelize.sync({alter:true});
-
-    // await seedDatabase();
+    await sequelize.sync({ alter: true });
 
     const server = app.listen(port, () => {
       console.log(`Server running on http://${host}:${port}`);
