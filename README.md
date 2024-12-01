@@ -1,19 +1,16 @@
-**YourDrive**
-================
+# **YourDrive**
 
-**About**
---------
+## **About**
 
 YourDrive is a Node.js application built with Express.js, Sequelize, and PostgreSQL. This project provides a RESTful API for Using Github as Your Personal Cloud Storage.
 
-**Setup**
---------
+## **Setup**
 
 ### Prerequisites
 
-* Node.js (version 14 or higher)
-* npm (version 6 or higher)
-* PostgreSQL (version 13 or higher)
+- Node.js (version 14 or higher)
+- npm (version 6 or higher)
+- PostgreSQL (version 13 or higher)
 
 ### Installation
 
@@ -28,45 +25,45 @@ YourDrive is a Node.js application built with Express.js, Sequelize, and Postgre
 1. Start the application: `npm run dev`
 2. Open your web browser and navigate to `http://localhost:3000/api/v1/docs`
 
-**Development**
---------------
+**Demo Video**
+[Demo Video](demo.mp4)
+
+## **Development**
 
 ### Running Tests
 
-* Coming soon!
+- Coming soon!
 
 ### Building the Application
 
-* Coming soon!
+- Coming soon!
 
-**Contributing**
---------------
+## **Contributing**
 
 Contributions are welcome! If you'd like to contribute to this project, please fork the repository, make your changes, and submit a pull request.
 
-**License**
----------
+## **License**
 
 This project is licensed under the ISC License.
 
-**Acknowledgments**
-----------------
+## **Acknowledgments**
 
-* bcrypt for password hashing
-* dotenv for environment variables
-* express for building the RESTful API
-* morgan for logging
-* multer for file uploads
-* pg and pg-hstore for PostgreSQL database interactions
-* sequelize for ORM
-* swagger-jsdoc and swagger-ui-express for API documentation
-* winston for logging
+- bcrypt for password hashing
+- dotenv for environment variables
+- express for building the RESTful API
+- morgan for logging
+- multer for file uploads
+- pg and pg-hstore for PostgreSQL database interactions
+- sequelize for ORM
+- swagger-jsdoc and swagger-ui-express for API documentation
+- winston for logging
 
 **Discord**
-* Join the Discord server 
-* https://discord.gg/JGYk8r8F
 
+- Join the Discord server
+- https://discord.gg/JGYk8r8F
 
 **Contact**
-* If you need any help or have any questions. feel free to contact
-* abdullatifnizamani517@gmail.com
+
+- If you need any help or have any questions. feel free to contact
+- abdullatifnizamani517@gmail.com
