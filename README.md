@@ -26,11 +26,7 @@ YourDrive is a Node.js application built with Express.js, Sequelize, and Postgre
 2. Open your web browser and navigate to `http://localhost:3000/api/v1/docs`
 
 **Demo Video**
-<video width="640" height="360" controls>
-
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[![Watch the video](https://img.youtube.com/vi/WUJ96JsE8eE/0.jpg)](https://youtu.be/WUJ96JsE8eE)
 
 ## **Development**
 
