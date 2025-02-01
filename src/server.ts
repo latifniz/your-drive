@@ -11,6 +11,9 @@ const startServer = async () => {
 
     const server = app.listen(port, () => {
       console.log(`Server running on http://${host}:${port}`);
+      console.log(
+        `Go to http://localhost:${port}/api/v1/docs for documentation`
+      );
     });
     server.requestTimeout = 1000 * 60 * 60 * 24; // 1 hour
     server.keepAliveTimeout = 1000 * 60 * 60 * 24; // 60 minutes

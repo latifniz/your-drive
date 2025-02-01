@@ -1,4 +1,5 @@
 node_modules/
+certs
 certs/
 .env
 basics.txt
